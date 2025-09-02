@@ -226,6 +226,8 @@ class ConnectionDock(QDockWidget):
             self.OperationMode.setText("Operational")
             self.OperationMode.setStyleSheet("background-color: green; color: white")
 
+
+
             
 
    
@@ -236,6 +238,9 @@ class MainWindow(QMainWindow):
                 
         # Init of Mqtt_client class
         self.mc=Mqtt_client()
+
+        self.the_temp=25+random.randrange(1,10)
+        self.the_humd=74+random.randrange(1,25)/10
         
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_data)
@@ -259,12 +264,33 @@ class MainWindow(QMainWindow):
         if TEMP:
 
             print('Next update')
-            temp=22+random.randrange(1,10)/10
-            hum=74+random.randrange(1,25)/10
-            current_data='Temperature Is: '+str(temp)+'; And Humidity Is: '+str(hum)
-            self.connectionDock.Temperature.setText(str(temp))
-            self.connectionDock.Humidity.setText(str(hum))
-            self.mc.publish_to(DHT_topic,current_data)      
+            current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
+            self.connectionDock.Temperature.setText(str(self.the_temp))
+            self.connectionDock.Humidity.setText(str(self.the_humd))
+            self.mc.publish_to(DHT_topic,current_data)    
+
+
+            if self.the_temp>29:
+
+                self.mc.publish_to(DHT_topic,"Dimming The Blinds Due To High Temperature")
+                while self.the_temp > 26:
+                    self.the_temp -= 1
+                    self.connectionDock.Temperature.setText(str(self.the_temp))
+                    current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
+                    self.mc.publish_to(DHT_topic,current_data)
+                
+            elif self.the_temp<20:
+
+                self.mc.publish_to(DHT_topic,"Raising The Blinds Due To Low Temperature")
+                while self.the_temp < 26:
+                    self.the_temp += 1
+                    self.connectionDock.Temperature.setText(str(self.the_temp))
+                    current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
+                    self.mc.publish_to(DHT_topic,current_data)
+
+            
+
+                  
             
              
 
