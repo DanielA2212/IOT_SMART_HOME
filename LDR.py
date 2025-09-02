@@ -7,7 +7,6 @@ from PyQt5.QtCore import *
 import paho.mqtt.client as mqtt
 from mqtt_init import *
 
-#from PyQt5.QtCore import QTimer
 
 # Creating Client name - should be unique 
 global clientname, CONNECTED
@@ -95,13 +94,13 @@ class Mqtt_client():
     def connect_to(self):
         # Init paho mqtt client class        
         self.client = mqtt.Client(self.clientname, clean_session=True) # create new client instance        
-        self.client.on_connect=self.on_connect  #bind call back function
+        self.client.on_connect=self.on_connect # bind call back function
         self.client.on_disconnect=self.on_disconnect
         self.client.on_log=self.on_log
         self.client.on_message=self.on_message
         self.client.username_pw_set(self.username,self.password)        
         print("Connecting to broker ",self.broker)        
-        self.client.connect(self.broker,self.port)     #connect to broker
+        self.client.connect(self.broker,self.port) # connect to broker
     
     def disconnect_from(self):
         self.client.disconnect()                   
@@ -165,7 +164,7 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn.setToolTip("click me to connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
         self.eConnectbtn.setStyleSheet("background-color: gray")
-        , QtWidgets
+        
         self.ePublisherTopic=QLineEdit()
         self.ePublisherTopic.setText(LDR_topic)
 
@@ -228,8 +227,8 @@ class MainWindow(QMainWindow):
 
     def update_data(self):
         print('Next update')
-        # LDR readings typically range from 0-1023 (10-bit ADC)
-        # Lower values = more light, Higher values = less light
+        # LDR Readings Range From 0-1023 
+        # Lower Values = More Light, Higher Values = Less Light
         light_level = random.randrange(50, 900)
         
         # Determine light status based on level
