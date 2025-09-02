@@ -1,14 +1,11 @@
-import os
 import sys
-import PyQt5
 import random
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import paho.mqtt.client as mqtt
-import time
-import datetime
+
 from mqtt_init import *
 
 #from PyQt5.QtCore import QTimer
@@ -18,9 +15,13 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id234-"+str(r)
-DHT_topic = 'home/daniel/RELAY'
+DHT_topic = 'MY_SMART_HOME'
+DHT_sub_topic = 'home/daniel/RELAY'
 update_rate = 7000 # in msec
 # (My) 7,000 msec = 7 sec
+
+global TEMP
+TEMP = False
 
 class Mqtt_client():
     
@@ -94,18 +95,18 @@ class Mqtt_client():
         topic=msg.topic
         m_decode=str(msg.payload.decode("utf-8","ignore"))
         print("message from:"+topic, m_decode)
-        mainwin.subscribeDock.update_mess_win(m_decode)
+        mainwin.connectionDock.turn_on_off(m_decode)
 
     def connect_to(self):
         # Init paho mqtt client class        
         self.client = mqtt.Client(self.clientname, clean_session=True) # create new client instance        
-        self.client.on_connect=self.on_connect  #bind call back function
+        self.client.on_connect=self.on_connect # bind call back function
         self.client.on_disconnect=self.on_disconnect
         self.client.on_log=self.on_log
         self.client.on_message=self.on_message
         self.client.username_pw_set(self.username,self.password)        
         print("Connecting to broker ",self.broker)        
-        self.client.connect(self.broker,self.port)     #connect to broker
+        self.client.connect(self.broker,self.port) # connect to broker
     
     def disconnect_from(self):
         self.client.disconnect()                   
@@ -121,8 +122,7 @@ class Mqtt_client():
             self.client.subscribe(topic)
         else:
             print("Can't subscribe. Connecection should be established first")         
-        
-              
+                 
     def publish_to(self, topic, message):
         if CONNECTED:
             self.client.publish(topic,message)
@@ -166,12 +166,14 @@ class ConnectionDock(QDockWidget):
         self.eCleanSession.setChecked(True)
         
         self.eConnectbtn=QPushButton("Enable/Connect", self)
-        self.eConnectbtn.setToolTip("click me to connect")
+        self.eConnectbtn.setToolTip("Click Me To Connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
-        self.eConnectbtn.setStyleSheet("background-color: gray")
+        self.eConnectbtn.setStyleSheet("background-color: gray, color: black")
         
         self.ePublisherTopic=QLineEdit()
         self.ePublisherTopic.setText(DHT_topic)
+
+        self.eSubscribeTopic = QLineEdit(DHT_sub_topic)
 
         self.Temperature=QLineEdit()
         self.Temperature.setText('')
@@ -179,11 +181,17 @@ class ConnectionDock(QDockWidget):
         self.Humidity=QLineEdit()
         self.Humidity.setText('')
 
+        self.OperationMode=QPushButton("Not Operational", self)
+        self.OperationMode.setStyleSheet("background-color: gray ; color: black")
+
+
         formLayot=QFormLayout()       
         formLayot.addRow("Turn On/Off",self.eConnectbtn)
         formLayot.addRow("Pub topic",self.ePublisherTopic)
+        formLayot.addRow("Sub topic",self.eSubscribeTopic)
         formLayot.addRow("Temperature",self.Temperature)
         formLayot.addRow("Humidity",self.Humidity)
+        formLayot.addRow("Operation Mode",self.OperationMode)
 
         widget = QWidget(self)
         widget.setLayout(formLayot)
@@ -193,6 +201,7 @@ class ConnectionDock(QDockWidget):
         
     def on_connected(self):
         self.eConnectbtn.setStyleSheet("background-color: green; color: white")
+        self.mc.subscribe_to(self.eSubscribeTopic.text())
                     
     def on_button_connect_click(self):
         self.mc.set_broker(self.eHostInput.text())
@@ -203,9 +212,23 @@ class ConnectionDock(QDockWidget):
         self.mc.connect_to()        
         self.mc.start_listening()
 
-    def push_button_click(self):
-        self.mc.publish_to(self.ePublisherTopic.text(), '"value":1')
-     
+    def turn_on_off(self, text):
+        global TEMP
+        TEMP = not TEMP
+
+        if not TEMP:
+            self.OperationMode.setText("Not Operational")
+            self.OperationMode.setStyleSheet("background-color: gray; color: black")
+            self.Temperature.setText("")
+            self.Humidity.setText("")
+
+        else:
+            self.OperationMode.setText("Operational")
+            self.OperationMode.setStyleSheet("background-color: green; color: white")
+
+            
+
+   
 class MainWindow(QMainWindow):
     
     def __init__(self, parent=None):
@@ -231,13 +254,19 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.TopDockWidgetArea, self.connectionDock)        
 
     def update_data(self):
-        print('Next update')
-        temp=22+random.randrange(1,10)/10
-        hum=74+random.randrange(1,25)/10
-        current_data='Temperature Is: '+str(temp)+'; And Humidity Is: '+str(hum)
-        self.connectionDock.Temperature.setText(str(temp))
-        self.connectionDock.Humidity.setText(str(hum))
-        self.mc.publish_to(DHT_topic,current_data)       
+        global TEMP
+
+        if TEMP:
+
+            print('Next update')
+            temp=22+random.randrange(1,10)/10
+            hum=74+random.randrange(1,25)/10
+            current_data='Temperature Is: '+str(temp)+'; And Humidity Is: '+str(hum)
+            self.connectionDock.Temperature.setText(str(temp))
+            self.connectionDock.Humidity.setText(str(hum))
+            self.mc.publish_to(DHT_topic,current_data)      
+            
+             
 
 
 app = QApplication(sys.argv)

@@ -151,7 +151,7 @@ class ConnectionDock(QDockWidget):
         self.eCleanSession.setChecked(True)
         
         self.eConnectbtn=QPushButton("Enable/Connect", self)
-        self.eConnectbtn.setToolTip("click me to connect")
+        self.eConnectbtn.setToolTip("click Me To Connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
         self.eConnectbtn.setStyleSheet("background-color: gery")
         
@@ -159,7 +159,7 @@ class ConnectionDock(QDockWidget):
         self.eSubscribeTopic.setText(relay_topic)
 
         self.ePushtbtn=QPushButton("", self)
-        self.ePushtbtn.setToolTip("Push me")
+        self.ePushtbtn.setToolTip("Do Not Push Me Please")
         self.ePushtbtn.setStyleSheet("background-color: red")
 
         formLayot=QFormLayout()
@@ -189,30 +189,48 @@ class ConnectionDock(QDockWidget):
     def update_btn_state(self,text):
         global STATE
 
-        if 'DOUBLE CLICK' in text :
+        if 'DOUBLE CLICK' in text and STATE != 'AUTO TEMP ON':
             self.ePushtbtn.setText("AUTO TEMP MODE")
             self.ePushtbtn.setStyleSheet("background-color: orange; color: black")
             STATE = 'AUTO TEMP ON'
             self.mc.publish_to("MY_SMART_HOME","Turning On Automatic Temperature Mode")
             return
+        
+        elif 'DOUBLE CLICK' in text and STATE == 'AUTO TEMP ON':
+            self.ePushtbtn.setText("AUTO TEMP OFF")
+            self.ePushtbtn.setStyleSheet("background-color: red; color: white")
+            STATE = 'AUTO TEMP OFF'
+            self.mc.publish_to("MY_SMART_HOME","Turning Off Automatic Temperature Mode")
+            return
 
-        if 'TRIPLE CLICK' in text:
+
+
+
+        if 'TRIPLE CLICK' in text and STATE != 'AUTO LIGHT ON':
             self.ePushtbtn.setText("AUTO LIGHT MODE")
             self.ePushtbtn.setStyleSheet("background-color: blue; color: white")
             STATE = 'AUTO LIGHT ON'
+            self.mc.publish_to("MY_SMART_HOME","Turning On Automatic Light Mode")
+            return
+        
+        elif 'TRIPLE CLICK' in text and STATE == 'AUTO LIGHT ON':
+            self.ePushtbtn.setText("AUTO LIGHT OFF")
+            self.ePushtbtn.setStyleSheet("background-color: red; color: white")
+            STATE = 'AUTO LIGHT OFF'
+            self.mc.publish_to("MY_SMART_HOME","Turning Off Automatic Light Mode")
+            return
+        
+
+
+             
+        if 'SINGLE CLICK' in text and STATE != 'MANUAL CLOSE':
+            self.ePushtbtn.setStyleSheet("background-color: yellow; color: black")
+            self.ePushtbtn.setText("Manual CLOSE")
+            STATE = 'MANUAL CLOSE'
+            self.mc.publish_to("MY_SMART_HOME","Closing Down All Blinds")
             return
 
-        # If The System Is ON 
-        if STATE == 'OFF' or STATE == 'MANUAL OPEN':
-             
-            if 'SINGLE CLICK' in text:
-                self.ePushtbtn.setStyleSheet("background-color: yellow; color: black")
-                self.ePushtbtn.setText("Manual CLOSE")
-                STATE = 'MANUAL CLOSE'
-                self.mc.publish_to("MY_SMART_HOME","Closing Down All Blinds")
-                return
-
-        elif STATE == 'MANUAL OPEN':
+        elif 'SINGLE CLICK' in text and STATE != 'MANUAL OPEN':
             
             if 'SINGLE CLICK' in text:
                 self.ePushtbtn.setStyleSheet("background-color: violet; color: black")
