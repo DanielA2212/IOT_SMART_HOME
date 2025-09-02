@@ -331,7 +331,7 @@ class ConnectionDock(QDockWidget):
         self.mc.start_listening()
 
 class PublishTab(QWidget):
-    """Single Publisher Tab"""
+
     def __init__(self, mc, tab_widget, tab_index):
         super().__init__()
         self.mc = mc
@@ -527,14 +527,14 @@ class PublishDock(QDockWidget):
         self.setWindowTitle("Publish")
     
     def get_tab_number_from_name(self, tab_name):
-        """Extract Number From Tab Name Like 'Publish 3' -> 3"""
+
         try:
             return int(tab_name.split()[-1])
         except:
             return 0
     
     def get_highest_tab_number(self):
-        """Scan All Current Tabs (Attached + Detached) And Find The Highest Number"""
+
         highest_number = 0
         
         # Check attached tabs in the main tab widget

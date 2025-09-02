@@ -1,14 +1,10 @@
-import os
 import sys
-import PyQt5
 import random
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import paho.mqtt.client as mqtt
-import time
-import datetime
 from mqtt_init import *
 
 #from PyQt5.QtCore import QTimer
@@ -17,10 +13,10 @@ from mqtt_init import *
 global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
-clientname="IOT_client-Id234-"+str(r)
-DHT_topic = 'home/daniel/'+str(r)+'/DHT'
-update_rate = 7000 # in msec
-# (My) 7,000 msec = 7 sec
+clientname="IOT_client-Id567-"+str(r)
+LDR_topic = 'home/daniel/'+str(r)+'/LDR'
+update_rate = 5000 # in msec
+# (My) 5,000 msec = 5 sec
 
 class Mqtt_client():
     
@@ -169,21 +165,21 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn.setToolTip("click me to connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
         self.eConnectbtn.setStyleSheet("background-color: gray")
-        
+        , QtWidgets
         self.ePublisherTopic=QLineEdit()
-        self.ePublisherTopic.setText(DHT_topic)
+        self.ePublisherTopic.setText(LDR_topic)
 
-        self.Temperature=QLineEdit()
-        self.Temperature.setText('')
+        self.LightLevel=QLineEdit()
+        self.LightLevel.setText('')
 
-        self.Humidity=QLineEdit()
-        self.Humidity.setText('')
+        self.LightStatus=QLineEdit()
+        self.LightStatus.setText('')
 
         formLayot=QFormLayout()       
         formLayot.addRow("Turn On/Off",self.eConnectbtn)
         formLayot.addRow("Pub topic",self.ePublisherTopic)
-        formLayot.addRow("Temperature",self.Temperature)
-        formLayot.addRow("Humidity",self.Humidity)
+        formLayot.addRow("Light Level",self.LightLevel)
+        formLayot.addRow("Light Status",self.LightStatus)
 
         widget = QWidget(self)
         widget.setLayout(formLayot)
@@ -223,7 +219,7 @@ class MainWindow(QMainWindow):
 
         # set up main window
         self.setGeometry(30, 600, 300, 150)
-        self.setWindowTitle('DHT')        
+        self.setWindowTitle('LDR Light Sensor')        
 
         # Init QDockWidget objects        
         self.connectionDock = ConnectionDock(self.mc)        
@@ -232,12 +228,24 @@ class MainWindow(QMainWindow):
 
     def update_data(self):
         print('Next update')
-        temp=22+random.randrange(1,10)/10
-        hum=74+random.randrange(1,25)/10
-        current_data='Temperature Is: '+str(temp)+'; And Humidity Is: '+str(hum)
-        self.connectionDock.Temperature.setText(str(temp))
-        self.connectionDock.Humidity.setText(str(hum))
-        self.mc.publish_to(DHT_topic,current_data)       
+        # LDR readings typically range from 0-1023 (10-bit ADC)
+        # Lower values = more light, Higher values = less light
+        light_level = random.randrange(50, 900)
+        
+        # Determine light status based on level
+        if light_level < 200:
+            light_status = "Bright"
+        elif light_level < 500:
+            light_status = "Moderate"
+        elif light_level < 700:
+            light_status = "Dim"
+        else:
+            light_status = "Dark"
+            
+        current_data = 'Light Level Is: '+str(light_level)+'; Light Status Is: '+light_status
+        self.connectionDock.LightLevel.setText(str(light_level))
+        self.connectionDock.LightStatus.setText(light_status)
+        self.mc.publish_to(LDR_topic, current_data)       
 
 
 app = QApplication(sys.argv)

@@ -1,14 +1,10 @@
-import os
 import sys
-import PyQt5
 import random
-from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import paho.mqtt.client as mqtt
-import time
-import datetime
+
 from mqtt_init import *
 
 # Creating Client name - should be unique 
@@ -199,7 +195,12 @@ class ConnectionDock(QDockWidget):
         self.mc.start_listening()
 
     def push_button_click(self):
-        self.mc.publish_to(self.ePublisherTopic.text(), '"value": 1')
+        self.ePushtbtn.setStyleSheet("background-color: cyan; color: black")
+        self.ePushtbtn.setText("PUSHED!!!")
+        QTimer.singleShot(3000, lambda: self.ePushtbtn.setStyleSheet("background-color: navy; color: white"))
+        QTimer.singleShot(3000, lambda: self.ePushtbtn.setText("PUSH BUTTON"))
+
+        self.mc.publish_to(self.ePublisherTopic.text(), "BUTTON PUSHED")
         
 class MainWindow(QMainWindow):
     
