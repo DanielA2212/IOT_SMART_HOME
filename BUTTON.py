@@ -129,6 +129,9 @@ class ConnectionDock(QDockWidget):
         
         self.mc = mc
         self.mc.set_on_connected_to_form(self.on_connected)
+        self.click_counter = 0
+        self.click_timer = QTimer()
+        self.click_timer.timeout.connect(self.process_clicks)
         self.eHostInput=QLineEdit()
         self.eHostInput.setInputMask('999.999.999.999')
         self.eHostInput.setText(broker_ip)
@@ -195,12 +198,34 @@ class ConnectionDock(QDockWidget):
         self.mc.start_listening()
 
     def push_button_click(self):
+        self.click_counter += 1
         self.ePushtbtn.setStyleSheet("background-color: cyan; color: black")
-        self.ePushtbtn.setText("PUSHED!!!")
-        QTimer.singleShot(3000, lambda: self.ePushtbtn.setStyleSheet("background-color: navy; color: white"))
-        QTimer.singleShot(3000, lambda: self.ePushtbtn.setText("PUSH BUTTON"))
-
-        self.mc.publish_to(self.ePublisherTopic.text(), "BUTTON PUSHED")
+        self.ePushtbtn.setText(f"CLICKED {self.click_counter}x")
+        
+        # Reset The Timer To Wait For More Clicks
+        self.click_timer.stop()
+        self.click_timer.start(500)  # Wait 500ms To Process Clicks
+        
+    def process_clicks(self):
+        self.click_timer.stop()
+        message = ""
+        
+        if self.click_counter == 1:
+            message = "SINGLE CLICK"
+        elif self.click_counter == 2:
+            message = "DOUBLE CLICK"
+        elif self.click_counter >= 3:
+            message = "TRIPLE CLICK"
+            
+        # Publish The Message
+        self.mc.publish_to(self.ePublisherTopic.text(), message)
+        
+        # Reset Button Appearance
+        QTimer.singleShot(1000, lambda:self.ePushtbtn.setStyleSheet("background-color: navy; color: white"))
+        QTimer.singleShot(1000, lambda:self.ePushtbtn.setText("PUSH BUTTON"))
+        
+        # Reset Counter
+        self.click_counter = 0
         
 class MainWindow(QMainWindow):
     

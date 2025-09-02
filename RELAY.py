@@ -15,7 +15,7 @@ global ON
 ON = False
 
 global STATE
-STATE = False
+STATE = 'OFF'
 
 class Mqtt_client():
     
@@ -187,19 +187,21 @@ class ConnectionDock(QDockWidget):
         self.mc.subscribe_to(self.eSubscribeTopic.text())
     
     def update_btn_state(self,text):
-
         global ON
+        
+        # If The System Is On 
         if ON:
-            self.ePushtbtn.setStyleSheet("background-color: darkorange")
+            self.ePushtbtn.setStyleSheet("background-color: red")
             ON = False
+
         else:
-            self.ePushtbtn.setStyleSheet("background-color: cyan")
+            self.ePushtbtn.setStyleSheet("background-color: green")
             ON = True 
 
 
         global STATE
 
-        
+
 
           
 class MainWindow(QMainWindow):
