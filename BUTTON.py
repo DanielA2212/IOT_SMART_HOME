@@ -13,7 +13,7 @@ CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id-"+str(r)
 
-button_topic = 'home/daniel/'+str(r)+'/BUTTON' 
+button_topic = 'home/daniel/RELAY' 
 
 
 class Mqtt_client():
@@ -211,11 +211,11 @@ class ConnectionDock(QDockWidget):
         message = ""
         
         if self.click_counter == 1:
-            message = "SINGLE CLICK"
+            message = "[BUTTON]: SINGLE CLICK"
         elif self.click_counter == 2:
-            message = "DOUBLE CLICK"
+            message = "[BUTTON]: DOUBLE CLICK"
         elif self.click_counter >= 3:
-            message = "TRIPLE CLICK"
+            message = "[BUTTON]: TRIPLE CLICK"
             
         # Publish The Message
         self.mc.publish_to(self.ePublisherTopic.text(), message)

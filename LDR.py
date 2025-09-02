@@ -13,7 +13,7 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id567-"+str(r)
-LDR_topic = 'home/daniel/'+str(r)+'/LDR'
+LDR_topic = 'home/daniel/RELAY'
 update_rate = 5000 # in msec
 # (My) 5,000 msec = 5 sec
 
@@ -241,7 +241,7 @@ class MainWindow(QMainWindow):
         else:
             light_status = "Dark"
             
-        current_data = 'Light Level Is: '+str(light_level)+'; Light Status Is: '+light_status
+        current_data = '[LDR]: Light Level Is: '+str(light_level)+'; Light Status Is: '+light_status
         self.connectionDock.LightLevel.setText(str(light_level))
         self.connectionDock.LightStatus.setText(light_status)
         self.mc.publish_to(LDR_topic, current_data)       

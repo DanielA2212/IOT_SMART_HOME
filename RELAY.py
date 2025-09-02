@@ -10,7 +10,7 @@ from mqtt_init import *
 global clientname
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id-"+str(r)
-relay_topic = 'home/daniel/'+str(r)+'/RELAY'
+relay_topic = 'home/daniel/RELAY'
 global ON
 ON = False
 
@@ -153,14 +153,14 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn=QPushButton("Enable/Connect", self)
         self.eConnectbtn.setToolTip("click me to connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
-        self.eConnectbtn.setStyleSheet("background-color: gray")
+        self.eConnectbtn.setStyleSheet("background-color: gery")
         
         self.eSubscribeTopic=QLineEdit()
         self.eSubscribeTopic.setText(relay_topic)
 
         self.ePushtbtn=QPushButton("", self)
         self.ePushtbtn.setToolTip("Push me")
-        self.ePushtbtn.setStyleSheet("background-color: gray")
+        self.ePushtbtn.setStyleSheet("background-color: red")
 
         formLayot=QFormLayout()
         formLayot.addRow("Turn On/Off",self.eConnectbtn)
@@ -187,19 +187,46 @@ class ConnectionDock(QDockWidget):
         self.mc.subscribe_to(self.eSubscribeTopic.text())
     
     def update_btn_state(self,text):
-        global ON
-        
-        # If The System Is On 
-        if ON:
-            self.ePushtbtn.setStyleSheet("background-color: red")
-            ON = False
-
-        else:
-            self.ePushtbtn.setStyleSheet("background-color: green")
-            ON = True 
-
-
         global STATE
+
+        if 'DOUBLE CLICK' in text :
+            self.ePushtbtn.setText("AUTO TEMP MODE")
+            self.ePushtbtn.setStyleSheet("background-color: orange; color: black")
+            STATE = 'AUTO TEMP ON'
+            self.mc.publish_to("MY_SMART_HOME","Turning On Automatic Temperature Mode")
+            return
+
+        if 'TRIPLE CLICK' in text:
+            self.ePushtbtn.setText("AUTO LIGHT MODE")
+            self.ePushtbtn.setStyleSheet("background-color: blue; color: white")
+            STATE = 'AUTO LIGHT ON'
+            return
+
+        # If The System Is ON 
+        if STATE == 'OFF' or STATE == 'MANUAL OPEN':
+             
+            if 'SINGLE CLICK' in text:
+                self.ePushtbtn.setStyleSheet("background-color: yellow; color: black")
+                self.ePushtbtn.setText("Manual CLOSE")
+                STATE = 'MANUAL CLOSE'
+                self.mc.publish_to("MY_SMART_HOME","Closing Down All Blinds")
+                return
+
+        elif STATE == 'MANUAL OPEN':
+            
+            if 'SINGLE CLICK' in text:
+                self.ePushtbtn.setStyleSheet("background-color: violet; color: black")
+                self.ePushtbtn.setText("Manual OPEN")
+                STATE = 'MANUAL OPEN'
+                self.mc.publish_to("MY_SMART_HOME","Opening Up All Blinds")
+                return
+
+                
+
+           
+
+
+    
 
 
 

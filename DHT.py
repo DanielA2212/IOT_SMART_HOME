@@ -18,7 +18,7 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id234-"+str(r)
-DHT_topic = 'home/daniel/'+str(r)+'/DHT'
+DHT_topic = 'home/daniel/RELAY'
 update_rate = 7000 # in msec
 # (My) 7,000 msec = 7 sec
 
