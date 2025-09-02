@@ -1,14 +1,9 @@
-import os
 import sys
-import PyQt5
 import random
-from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import paho.mqtt.client as mqtt
-import time
-import datetime
 from mqtt_init import *
 
 # Creating Client name - should be unique 
@@ -18,6 +13,9 @@ clientname="IOT_client-Id-"+str(r)
 relay_topic = 'home/daniel/'+str(r)+'/RELAY'
 global ON
 ON = False
+
+global STATE
+STATE = False
 
 class Mqtt_client():
     
@@ -189,14 +187,21 @@ class ConnectionDock(QDockWidget):
         self.mc.subscribe_to(self.eSubscribeTopic.text())
     
     def update_btn_state(self,text):
+
         global ON
         if ON:
             self.ePushtbtn.setStyleSheet("background-color: darkorange")
             ON = False
         else:
             self.ePushtbtn.setStyleSheet("background-color: cyan")
-            ON = True   
-      
+            ON = True 
+
+
+        global STATE
+
+        
+
+          
 class MainWindow(QMainWindow):
     
     def __init__(self, parent=None):
