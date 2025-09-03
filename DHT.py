@@ -283,7 +283,6 @@ class MainWindow(QMainWindow):
         self.mc=Mqtt_client()
 
         self.the_temp = 25 + (random.choice([-1, 1]) * random.randrange(1, 10))
-        self.the_humd = 74 + random.randrange(1,25)/10
         
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_data)
@@ -309,6 +308,7 @@ class MainWindow(QMainWindow):
             print('Next update')
             self.the_humd = 74 + random.randrange(1,25)/10
             self.connectionDock.Temperature.setText(str(self.the_temp))
+            self.connectionDock.Humidity.setText(str(self.the_humd))
             current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
             self.mc.publish_to(smart_home_topic,current_data)
     
