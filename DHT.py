@@ -17,6 +17,7 @@ r=random.randrange(1,10000000)
 clientname="IOT_client-Id234-"+str(r)
 smart_home_topic = 'MY_SMART_HOME'
 DHT_sub_topic = 'home/daniel/RELAY'
+dht_publish_topic = 'home/daniel/DHT'
 update_rate = 7000 # in msec
 # (My) 7,000 msec = 7 sec
 
@@ -327,7 +328,8 @@ class MainWindow(QMainWindow):
                 
 
             else:
-                self.mc.publish_to(smart_home_topic,"Temperature Stable, No Action Taken")
+                self.mc.publish_to(smart_home_topic,"Temperature Optimal, No Action Taken")
+                self.mc.publish_to(dht_publish_topic,"Optimal Temperature")
                 
             
 

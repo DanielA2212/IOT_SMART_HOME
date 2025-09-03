@@ -203,7 +203,7 @@ class ConnectionDock(QDockWidget):
         global STATE
 
         if 'DOUBLE CLICK' in text and STATE != 'AUTO TEMP ON':
-            self.ePushtbtn.setText("AUTO TEMP MODE")
+            self.ePushtbtn.setText("AUTO TEMP ON (Working...)")
             self.ePushtbtn.setStyleSheet("background-color: orange; color: black")
             STATE = 'AUTO TEMP ON'
             self.mc.publish_to(smart_home_topic,"Turning On Automatic Temperature Mode")
@@ -222,7 +222,7 @@ class ConnectionDock(QDockWidget):
 
 
         if 'TRIPLE CLICK' in text and STATE != 'AUTO LIGHT ON':
-            self.ePushtbtn.setText("AUTO LIGHT MODE")
+            self.ePushtbtn.setText("AUTO LIGHT ON (Working...)")
             self.ePushtbtn.setStyleSheet("background-color: blue; color: white")
             STATE = 'AUTO LIGHT ON'
             self.mc.publish_to(smart_home_topic,"Turning On Automatic Light Mode")
@@ -248,13 +248,26 @@ class ConnectionDock(QDockWidget):
             self.mc.publish_to(relay_topic,STATE)
             return
 
-        elif 'SINGLE CLICK' in text and STATE != 'MANUAL OPEN':
+        elif 'SINGLE CLICK' in text and STATE == 'MANUAL CLOSE':
             
             self.ePushtbtn.setStyleSheet("background-color: violet; color: black")
             self.ePushtbtn.setText("Manual OPEN")
             STATE = 'MANUAL OPEN'
             self.mc.publish_to(smart_home_topic,"Opening Up All Blinds")
             self.mc.publish_to(relay_topic,STATE)
+            return
+        
+
+        if 'Optimal Light Level' in text:
+            self.ePushtbtn.setStyleSheet("background-color: green; color: white")
+            self.ePushtbtn.setText("Optimal Light Level")
+            STATE = 'OFF'
+            return
+        
+        if 'Optimal Temperature' in text:
+            self.ePushtbtn.setStyleSheet("background-color: green; color: white")
+            self.ePushtbtn.setText("Optimal Temperature")
+            STATE = 'OFF'
             return
 
                 

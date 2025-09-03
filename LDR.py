@@ -16,6 +16,8 @@ clientname="IOT_client-Id567-"+str(r)
 
 smart_home_topic = 'MY_SMART_HOME'
 LDR_topic = 'home/daniel/RELAY'
+ldr_publish_topic = 'home/daniel/LDR'
+
 update_rate = 5000 # in msec
 # (My) 5,000 msec = 5 sec
 
@@ -323,12 +325,13 @@ class MainWindow(QMainWindow):
                 self.the_light -= 50
 
             elif self.the_light < 200: # Too Bright
-                
+
                 self.mc.publish_to(smart_home_topic, "Dimming The Blinds Due To Low Brightness")
                 self.the_light += 50
      
             else:
-                self.mc.publish_to(smart_home_topic, "Light Level Stable, No Action Taken")
+                self.mc.publish_to(smart_home_topic, "Light Level Optimal, No Action Taken")
+                self.mc.publish_to(ldr_publish_topic,"Optimal Light Level")
 
 
 app = QApplication(sys.argv)
