@@ -160,7 +160,7 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn=QPushButton("Enable/Connect", self)
         self.eConnectbtn.setToolTip("click Me To Connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
-        self.eConnectbtn.setStyleSheet("background-color: gery")
+        self.eConnectbtn.setStyleSheet("background-color: gray")
         
         self.topicsList = QListWidget(self)
         self.topicsList.addItems([button_sub_topic, dht_sub_topic, ldr_sub_topic])
@@ -226,6 +226,7 @@ class ConnectionDock(QDockWidget):
             self.ePushtbtn.setStyleSheet("background-color: blue; color: white")
             STATE = 'AUTO LIGHT ON'
             self.mc.publish_to(smart_home_topic,"Turning On Automatic Light Mode")
+            self.mc.publish_to(relay_topic,STATE)
             return
         
         elif 'TRIPLE CLICK' in text and STATE == 'AUTO LIGHT ON':
@@ -233,6 +234,7 @@ class ConnectionDock(QDockWidget):
             self.ePushtbtn.setStyleSheet("background-color: red; color: white")
             STATE = 'AUTO LIGHT OFF'
             self.mc.publish_to(smart_home_topic,"Turning Off Automatic Light Mode")
+            self.mc.publish_to(relay_topic,STATE)
             return
         
 
@@ -248,13 +250,12 @@ class ConnectionDock(QDockWidget):
 
         elif 'SINGLE CLICK' in text and STATE != 'MANUAL OPEN':
             
-            if 'SINGLE CLICK' in text:
-                self.ePushtbtn.setStyleSheet("background-color: violet; color: black")
-                self.ePushtbtn.setText("Manual OPEN")
-                STATE = 'MANUAL OPEN'
-                self.mc.publish_to(smart_home_topic,"Opening Up All Blinds")
-                self.mc.publish_to(relay_topic,STATE)
-                return
+            self.ePushtbtn.setStyleSheet("background-color: violet; color: black")
+            self.ePushtbtn.setText("Manual OPEN")
+            STATE = 'MANUAL OPEN'
+            self.mc.publish_to(smart_home_topic,"Opening Up All Blinds")
+            self.mc.publish_to(relay_topic,STATE)
+            return
 
                 
 

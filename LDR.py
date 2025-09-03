@@ -13,9 +13,14 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id567-"+str(r)
+
+smart_home_topic = 'MY_SMART_HOME'
 LDR_topic = 'home/daniel/RELAY'
 update_rate = 5000 # in msec
 # (My) 5,000 msec = 5 sec
+
+global LIGHT
+LIGHT = False
 
 class Mqtt_client():
     
@@ -89,7 +94,7 @@ class Mqtt_client():
         topic=msg.topic
         m_decode=str(msg.payload.decode("utf-8","ignore"))
         print("message from:"+topic, m_decode)
-        mainwin.subscribeDock.update_mess_win(m_decode)
+        mainwin.connectionDock.turn_on_off(m_decode)
 
     def connect_to(self):
         # Init paho mqtt client class        
@@ -166,7 +171,7 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn.setStyleSheet("background-color: gray")
         
         self.ePublisherTopic=QLineEdit()
-        self.ePublisherTopic.setText(LDR_topic)
+        self.ePublisherTopic.setText(smart_home_topic)
 
         self.LightLevel=QLineEdit()
         self.LightLevel.setText('')
@@ -174,11 +179,37 @@ class ConnectionDock(QDockWidget):
         self.LightStatus=QLineEdit()
         self.LightStatus.setText('')
 
+        self.eSubscribeTopic = QLineEdit(LDR_topic)
+
+        self.lightButtonsLayout = QHBoxLayout()
+        
+        # Bright Button
+        self.brightButton = QPushButton("☀️", self)
+        self.brightButton.setFixedSize(40, 40)
+        self.brightButton.clicked.connect(self.set_bright)
+        self.brightButton.setStyleSheet("background-color: yellow; font-size: 20px")
+        
+        # Dark Button
+        self.darkButton = QPushButton("🌙", self)
+        self.darkButton.setFixedSize(40, 40)
+        self.darkButton.clicked.connect(self.set_dark)
+        self.darkButton.setStyleSheet("background-color: darkgray; font-size: 20px")
+        
+        # Add Buttons Horizontaly
+        self.lightButtonsLayout.addWidget(self.brightButton)
+        self.lightButtonsLayout.addWidget(self.darkButton)
+
+        self.OperationMode=QPushButton("Not Operational", self)
+        self.OperationMode.setStyleSheet("background-color: gray; color: black")
+
         formLayot=QFormLayout()       
         formLayot.addRow("Turn On/Off",self.eConnectbtn)
         formLayot.addRow("Pub topic",self.ePublisherTopic)
+        formLayot.addRow("Sub topic",self.eSubscribeTopic)
         formLayot.addRow("Light Level",self.LightLevel)
         formLayot.addRow("Light Status",self.LightStatus)
+        formLayot.addRow("Operation Mode",self.OperationMode)
+        formLayot.addRow("Light Control", self.lightButtonsLayout)
 
         widget = QWidget(self)
         widget.setLayout(formLayot)
@@ -188,6 +219,7 @@ class ConnectionDock(QDockWidget):
         
     def on_connected(self):
         self.eConnectbtn.setStyleSheet("background-color: green; color: white")
+        self.mc.subscribe_to(self.eSubscribeTopic.text())
                     
     def on_button_connect_click(self):
         self.mc.set_broker(self.eHostInput.text())
@@ -198,8 +230,42 @@ class ConnectionDock(QDockWidget):
         self.mc.connect_to()        
         self.mc.start_listening()
 
-    def push_button_click(self):
-        self.mc.publish_to(self.ePublisherTopic.text(), '"value":1')
+    def turn_on_off(self, text):
+        global LIGHT
+
+        if "AUTO LIGHT ON" in text:
+            self.mc.publish_to(smart_home_topic,"Starting AUTO LIGHT Operation")
+            LIGHT = True 
+        
+        elif "AUTO LIGHT OFF" in text:
+            self.mc.publish_to(smart_home_topic,"Stopping AUTO LIGHT Operation")
+            LIGHT = False
+
+        elif LIGHT:
+            LIGHT = False
+            self.mc.publish_to(smart_home_topic,"Stopping AUTO LIGHT Operation")
+
+
+        if not LIGHT:
+            self.OperationMode.setText("Not Operational")
+            self.OperationMode.setStyleSheet("background-color: gray; color: black")
+            self.LightLevel.setText("")
+            self.LightStatus.setText("")
+            return
+        else:
+            self.OperationMode.setText("Operational")
+            self.OperationMode.setStyleSheet("background-color: green; color: white")
+            return
+
+    def set_bright(self):
+        global LIGHT
+        if LIGHT:
+            mainwin.the_light = 100
+
+    def set_dark(self):
+        global LIGHT
+        if LIGHT:
+            mainwin.the_light = 800
      
 class MainWindow(QMainWindow):
     
@@ -208,6 +274,8 @@ class MainWindow(QMainWindow):
                 
         # Init of Mqtt_client class
         self.mc=Mqtt_client()
+        
+        self.the_light = random.randrange(50, 900)
         
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_data)
@@ -226,25 +294,41 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.TopDockWidgetArea, self.connectionDock)        
 
     def update_data(self):
-        print('Next update')
-        # LDR Readings Range From 0-1023 
-        # Lower Values = More Light, Higher Values = Less Light
-        light_level = random.randrange(50, 900)
-        
-        # Determine light status based on level
-        if light_level < 200:
-            light_status = "Bright"
-        elif light_level < 500:
-            light_status = "Moderate"
-        elif light_level < 700:
-            light_status = "Dim"
-        else:
-            light_status = "Dark"
+        global LIGHT
+
+        if LIGHT:
+            print('Next update')
             
-        current_data = '[LDR]: Light Level Is: '+str(light_level)+'; Light Status Is: '+light_status
-        self.connectionDock.LightLevel.setText(str(light_level))
-        self.connectionDock.LightStatus.setText(light_status)
-        self.mc.publish_to(LDR_topic, current_data)       
+            # Determine Light Status 
+            if self.the_light < 200:
+                light_status = "Very Bright"
+
+            elif 200 < self.the_light < 500:
+                light_status = "Moderate"
+
+            elif 500 < self.the_light < 700:
+                light_status = "Dim"
+
+            else:
+                light_status = "Dark"
+                
+            current_data = '[LDR]: Light Level Is: '+str(self.the_light)+'; Light Status Is: '+light_status
+            self.connectionDock.LightLevel.setText(str(self.the_light))
+            self.connectionDock.LightStatus.setText(light_status)
+            self.mc.publish_to(smart_home_topic, current_data)
+
+            if self.the_light > 500: # Too Dark
+
+                self.mc.publish_to(smart_home_topic, "Raising The Blinds Due To Low Brightness")
+                self.the_light -= 50
+
+            elif self.the_light < 200: # Too Bright
+                
+                self.mc.publish_to(smart_home_topic, "Dimming The Blinds Due To Low Brightness")
+                self.the_light += 50
+     
+            else:
+                self.mc.publish_to(smart_home_topic, "Light Level Stable, No Action Taken")
 
 
 app = QApplication(sys.argv)

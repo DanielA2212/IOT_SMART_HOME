@@ -234,18 +234,20 @@ class ConnectionDock(QDockWidget):
         global TEMP
 
         if "AUTO TEMP ON" in text:
+            self.mc.publish_to(smart_home_topic,"Starting AUTO TEMP Operation")
             TEMP = True 
         
         elif "AUTO TEMP OFF" in text:
+            self.mc.publish_to(smart_home_topic,"Stoping AUTO TEMP Operation")
             TEMP = False
 
         elif TEMP:
+            self.mc.publish_to(smart_home_topic,"Stoping AUTO TEMP Operation")
             TEMP = False
 
         
 
         if not TEMP:
-            self.mc.publish_to(smart_home_topic,"Stoping AUTO TEMP Operation")
             self.OperationMode.setText("Not Operational")
             self.OperationMode.setStyleSheet("background-color: gray; color: black")
             self.Temperature.setText("")
@@ -253,7 +255,6 @@ class ConnectionDock(QDockWidget):
             return
 
         else:
-            self.mc.publish_to(smart_home_topic,"Starting AUTO TEMP Operation")
             self.OperationMode.setText("Operational")
             self.OperationMode.setStyleSheet("background-color: green; color: white")
             return
@@ -306,11 +307,10 @@ class MainWindow(QMainWindow):
         if TEMP:
 
             print('Next update')
-            current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
-            self.connectionDock.Temperature.setText(str(self.the_temp))
-            self.connectionDock.Humidity.setText(str(self.the_humd))
-            self.mc.publish_to(smart_home_topic,current_data)
             self.the_humd = 74 + random.randrange(1,25)/10
+            self.connectionDock.Temperature.setText(str(self.the_temp))
+            current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
+            self.mc.publish_to(smart_home_topic,current_data)
     
 
 
@@ -318,23 +318,17 @@ class MainWindow(QMainWindow):
 
                 self.mc.publish_to(smart_home_topic,"Dimming The Blinds Due To High Temperature")
                 self.the_temp -= 1
-                self.connectionDock.Temperature.setText(str(self.the_temp))
-                current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
-                self.mc.publish_to(smart_home_topic,current_data)
+
                 
             elif self.the_temp<26:
 
                 self.mc.publish_to(smart_home_topic,"Raising The Blinds Due To Low Temperature")
                 self.the_temp += 1
-                self.connectionDock.Temperature.setText(str(self.the_temp))
-                current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
-                self.mc.publish_to(smart_home_topic,current_data)
+                
 
             else:
                 self.mc.publish_to(smart_home_topic,"Temperature Stable, No Action Taken")
-                current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
-                self.mc.publish_to(smart_home_topic,current_data)
-
+                
             
 
                   
