@@ -13,7 +13,7 @@ CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id-"+str(r)
 
-button_topic = 'home/daniel/RELAY' 
+button_topic = 'home/daniel/BUTTON' 
 
 
 class Mqtt_client():

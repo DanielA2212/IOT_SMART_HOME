@@ -15,7 +15,7 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id234-"+str(r)
-DHT_topic = 'MY_SMART_HOME'
+smart_home_topic = 'MY_SMART_HOME'
 DHT_sub_topic = 'home/daniel/RELAY'
 update_rate = 7000 # in msec
 # (My) 7,000 msec = 7 sec
@@ -168,10 +168,10 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn=QPushButton("Enable/Connect", self)
         self.eConnectbtn.setToolTip("Click Me To Connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
-        self.eConnectbtn.setStyleSheet("background-color: gray, color: black")
+        self.eConnectbtn.setStyleSheet("background-color: gray; color: black")
         
         self.ePublisherTopic=QLineEdit()
-        self.ePublisherTopic.setText(DHT_topic)
+        self.ePublisherTopic.setText(smart_home_topic)
 
         self.eSubscribeTopic = QLineEdit(DHT_sub_topic)
 
@@ -182,8 +182,25 @@ class ConnectionDock(QDockWidget):
         self.Humidity.setText('')
 
         self.OperationMode=QPushButton("Not Operational", self)
-        self.OperationMode.setStyleSheet("background-color: gray ; color: black")
+        self.OperationMode.setStyleSheet("background-color: gray; color: black")
 
+        self.tempButtonsLayout = QHBoxLayout()
+        
+        # Cold Button
+        self.coldButton = QPushButton("❄️", self)
+        self.coldButton.setFixedSize(40, 40)
+        self.coldButton.clicked.connect(self.set_cold_temp)
+        self.coldButton.setStyleSheet("background-color: lightblue; font-size: 20px")
+        
+        # Hot Button
+        self.hotButton = QPushButton("🔥", self)
+        self.hotButton.setFixedSize(40, 40)
+        self.hotButton.clicked.connect(self.set_hot_temp)
+        self.hotButton.setStyleSheet("background-color: lightsalmon; font-size: 20px")
+        
+        # Add Buttons Horizontaly
+        self.tempButtonsLayout.addWidget(self.coldButton)
+        self.tempButtonsLayout.addWidget(self.hotButton)
 
         formLayot=QFormLayout()       
         formLayot.addRow("Turn On/Off",self.eConnectbtn)
@@ -192,6 +209,7 @@ class ConnectionDock(QDockWidget):
         formLayot.addRow("Temperature",self.Temperature)
         formLayot.addRow("Humidity",self.Humidity)
         formLayot.addRow("Operation Mode",self.OperationMode)
+        formLayot.addRow("Temperature Control", self.tempButtonsLayout)
 
         widget = QWidget(self)
         widget.setLayout(formLayot)
@@ -214,19 +232,43 @@ class ConnectionDock(QDockWidget):
 
     def turn_on_off(self, text):
         global TEMP
-        TEMP = not TEMP
+
+        if "AUTO TEMP ON" in text:
+            TEMP = True 
+        
+        elif "AUTO TEMP OFF" in text:
+            TEMP = False
+
+        elif TEMP:
+            TEMP = False
+
+        
 
         if not TEMP:
+            self.mc.publish_to(smart_home_topic,"Stoping AUTO TEMP Operation")
             self.OperationMode.setText("Not Operational")
             self.OperationMode.setStyleSheet("background-color: gray; color: black")
             self.Temperature.setText("")
             self.Humidity.setText("")
+            return
 
         else:
+            self.mc.publish_to(smart_home_topic,"Starting AUTO TEMP Operation")
             self.OperationMode.setText("Operational")
             self.OperationMode.setStyleSheet("background-color: green; color: white")
+            return
+
+    def set_cold_temp(self):
+        global TEMP
+        if TEMP:
+            mainwin.the_temp = 16
 
 
+    def set_hot_temp(self):
+        global TEMP
+        if TEMP:
+            mainwin.the_temp = 35 
+           
 
             
 
@@ -239,8 +281,8 @@ class MainWindow(QMainWindow):
         # Init of Mqtt_client class
         self.mc=Mqtt_client()
 
-        self.the_temp=25+random.randrange(1,10)
-        self.the_humd=74+random.randrange(1,25)/10
+        self.the_temp = 25 + (random.choice([-1, 1]) * random.randrange(1, 10))
+        self.the_humd = 74 + random.randrange(1,25)/10
         
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_data)
@@ -267,26 +309,31 @@ class MainWindow(QMainWindow):
             current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
             self.connectionDock.Temperature.setText(str(self.the_temp))
             self.connectionDock.Humidity.setText(str(self.the_humd))
-            self.mc.publish_to(DHT_topic,current_data)    
+            self.mc.publish_to(smart_home_topic,current_data)
+            self.the_humd = 74 + random.randrange(1,25)/10
+    
 
 
-            if self.the_temp>29:
+            if self.the_temp>26:
 
-                self.mc.publish_to(DHT_topic,"Dimming The Blinds Due To High Temperature")
-                while self.the_temp > 26:
-                    self.the_temp -= 1
-                    self.connectionDock.Temperature.setText(str(self.the_temp))
-                    current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
-                    self.mc.publish_to(DHT_topic,current_data)
+                self.mc.publish_to(smart_home_topic,"Dimming The Blinds Due To High Temperature")
+                self.the_temp -= 1
+                self.connectionDock.Temperature.setText(str(self.the_temp))
+                current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
+                self.mc.publish_to(smart_home_topic,current_data)
                 
-            elif self.the_temp<20:
+            elif self.the_temp<26:
 
-                self.mc.publish_to(DHT_topic,"Raising The Blinds Due To Low Temperature")
-                while self.the_temp < 26:
-                    self.the_temp += 1
-                    self.connectionDock.Temperature.setText(str(self.the_temp))
-                    current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
-                    self.mc.publish_to(DHT_topic,current_data)
+                self.mc.publish_to(smart_home_topic,"Raising The Blinds Due To Low Temperature")
+                self.the_temp += 1
+                self.connectionDock.Temperature.setText(str(self.the_temp))
+                current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
+                self.mc.publish_to(smart_home_topic,current_data)
+
+            else:
+                self.mc.publish_to(smart_home_topic,"Temperature Stable, No Action Taken")
+                current_data='[DHT]: Temperature Is: '+str(self.the_temp)+'; And Humidity Is: '+str(self.the_humd)
+                self.mc.publish_to(smart_home_topic,current_data)
 
             
 

@@ -10,7 +10,14 @@ from mqtt_init import *
 global clientname
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id-"+str(r)
+
 relay_topic = 'home/daniel/RELAY'
+
+smart_home_topic = 'MY_SMART_HOME'
+
+button_sub_topic = 'home/daniel/BUTTON'
+dht_sub_topic = 'home/daniel/DHT'
+ldr_sub_topic = 'home/daniel/LDR'
 global ON
 ON = False
 
@@ -155,8 +162,9 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
         self.eConnectbtn.setStyleSheet("background-color: gery")
         
-        self.eSubscribeTopic=QLineEdit()
-        self.eSubscribeTopic.setText(relay_topic)
+        self.topicsList = QListWidget(self)
+        self.topicsList.addItems([button_sub_topic, dht_sub_topic, ldr_sub_topic])
+        self.topicsList.setMaximumHeight(100)
 
         self.ePushtbtn=QPushButton("", self)
         self.ePushtbtn.setToolTip("Do Not Push Me Please")
@@ -164,7 +172,7 @@ class ConnectionDock(QDockWidget):
 
         formLayot=QFormLayout()
         formLayot.addRow("Turn On/Off",self.eConnectbtn)
-        formLayot.addRow("Sub topic",self.eSubscribeTopic)
+        formLayot.addRow("Subscribed Topics", self.topicsList)
         formLayot.addRow("Status",self.ePushtbtn)
 
         widget = QWidget(self)
@@ -184,7 +192,12 @@ class ConnectionDock(QDockWidget):
         self.mc.set_password(self.ePassword.text())        
         self.mc.connect_to()        
         self.mc.start_listening()
-        self.mc.subscribe_to(self.eSubscribeTopic.text())
+        
+        # Subscribe To All Topics In The List
+        for index in range(self.topicsList.count()):
+            topic = self.topicsList.item(index).text()
+            self.mc.subscribe_to(topic)
+            print(f"Subscribed to: {topic}")
     
     def update_btn_state(self,text):
         global STATE
@@ -193,14 +206,16 @@ class ConnectionDock(QDockWidget):
             self.ePushtbtn.setText("AUTO TEMP MODE")
             self.ePushtbtn.setStyleSheet("background-color: orange; color: black")
             STATE = 'AUTO TEMP ON'
-            self.mc.publish_to("MY_SMART_HOME","Turning On Automatic Temperature Mode")
+            self.mc.publish_to(smart_home_topic,"Turning On Automatic Temperature Mode")
+            self.mc.publish_to(relay_topic,STATE)
             return
         
         elif 'DOUBLE CLICK' in text and STATE == 'AUTO TEMP ON':
             self.ePushtbtn.setText("AUTO TEMP OFF")
             self.ePushtbtn.setStyleSheet("background-color: red; color: white")
             STATE = 'AUTO TEMP OFF'
-            self.mc.publish_to("MY_SMART_HOME","Turning Off Automatic Temperature Mode")
+            self.mc.publish_to(smart_home_topic,"Turning Off Automatic Temperature Mode")
+            self.mc.publish_to(relay_topic,STATE)
             return
 
 
@@ -210,14 +225,14 @@ class ConnectionDock(QDockWidget):
             self.ePushtbtn.setText("AUTO LIGHT MODE")
             self.ePushtbtn.setStyleSheet("background-color: blue; color: white")
             STATE = 'AUTO LIGHT ON'
-            self.mc.publish_to("MY_SMART_HOME","Turning On Automatic Light Mode")
+            self.mc.publish_to(smart_home_topic,"Turning On Automatic Light Mode")
             return
         
         elif 'TRIPLE CLICK' in text and STATE == 'AUTO LIGHT ON':
             self.ePushtbtn.setText("AUTO LIGHT OFF")
             self.ePushtbtn.setStyleSheet("background-color: red; color: white")
             STATE = 'AUTO LIGHT OFF'
-            self.mc.publish_to("MY_SMART_HOME","Turning Off Automatic Light Mode")
+            self.mc.publish_to(smart_home_topic,"Turning Off Automatic Light Mode")
             return
         
 
@@ -227,7 +242,8 @@ class ConnectionDock(QDockWidget):
             self.ePushtbtn.setStyleSheet("background-color: yellow; color: black")
             self.ePushtbtn.setText("Manual CLOSE")
             STATE = 'MANUAL CLOSE'
-            self.mc.publish_to("MY_SMART_HOME","Closing Down All Blinds")
+            self.mc.publish_to(smart_home_topic,"Closing Down All Blinds")
+            self.mc.publish_to(relay_topic,STATE)
             return
 
         elif 'SINGLE CLICK' in text and STATE != 'MANUAL OPEN':
@@ -236,7 +252,8 @@ class ConnectionDock(QDockWidget):
                 self.ePushtbtn.setStyleSheet("background-color: violet; color: black")
                 self.ePushtbtn.setText("Manual OPEN")
                 STATE = 'MANUAL OPEN'
-                self.mc.publish_to("MY_SMART_HOME","Opening Up All Blinds")
+                self.mc.publish_to(smart_home_topic,"Opening Up All Blinds")
+                self.mc.publish_to(relay_topic,STATE)
                 return
 
                 
