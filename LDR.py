@@ -190,14 +190,12 @@ class ConnectionDock(QDockWidget):
         self.brightButton.setFixedSize(40, 40)
         self.brightButton.clicked.connect(self.set_bright)
         self.brightButton.setStyleSheet("background-color: yellow; font-size: 20px")
-        self.mc.publish_to(LDR_sub_topic, "Changed Light")
         
         # Dark Button
         self.darkButton = QPushButton("🌙", self)
         self.darkButton.setFixedSize(40, 40)
         self.darkButton.clicked.connect(self.set_dark)
         self.darkButton.setStyleSheet("background-color: darkgray; font-size: 20px")
-        self.mc.publish_to(LDR_sub_topic, "Changed Light")
 
         
         # Add Buttons Horizontaly
@@ -266,11 +264,15 @@ class ConnectionDock(QDockWidget):
         global LIGHT
         if LIGHT:
             mainwin.the_light = 100
+            self.mc.publish_to(LDR_sub_topic, "Changed Light")
+
 
     def set_dark(self):
         global LIGHT
         if LIGHT:
             mainwin.the_light = 800
+            self.mc.publish_to(LDR_sub_topic, "Changed Light")
+
      
 class MainWindow(QMainWindow):
     

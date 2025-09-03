@@ -20,8 +20,8 @@ smart_home_topic = 'MY_SMART_HOME'
 DHT_sub_topic = 'home/daniel/RELAY'
 dht_publish_topic = 'home/daniel/DHT'
 
-update_rate = 7000 # in msec
-# (My) 7,000 msec = 7 sec
+update_rate = 5000 # in msec
+# (My) 5,000 msec = 5 sec
 
 global TEMP
 TEMP = False
@@ -194,7 +194,6 @@ class ConnectionDock(QDockWidget):
         self.coldButton.setFixedSize(40, 40)
         self.coldButton.clicked.connect(self.set_cold_temp)
         self.coldButton.setStyleSheet("background-color: lightblue; font-size: 20px")
-        self.mc.publish_to(DHT_sub_topic, "Changed Temp")
         
         # Hot Button
         self.hotButton = QPushButton("🔥", self)
@@ -269,17 +268,19 @@ class ConnectionDock(QDockWidget):
         global TEMP
         if TEMP:
             mainwin.the_temp = 16
+            self.mc.publish_to(DHT_sub_topic, "Changed Temp")
+
 
 
     def set_hot_temp(self):
         global TEMP
         if TEMP:
-            mainwin.the_temp = 35 
+            mainwin.the_temp = 35
+            self.mc.publish_to(DHT_sub_topic, "Changed Temp")
+ 
            
 
-            
-
-   
+              
 class MainWindow(QMainWindow):
     
     def __init__(self, parent=None):
@@ -336,12 +337,6 @@ class MainWindow(QMainWindow):
                 self.mc.publish_to(smart_home_topic,"Temperature Optimal, No Action Taken")
                 self.mc.publish_to(dht_publish_topic,"Optimal Temperature")
                 
-            
-
-                  
-            
-             
-
 
 app = QApplication(sys.argv)
 mainwin = MainWindow()
