@@ -178,7 +178,3 @@ IOT_SMART_HOME/
 ## Contributing
 
 Feel free to fork the project and submit pull requests for any improvements.
-
-## License
-
-This project is available under the MIT License. See the LICENSE file for more details.
