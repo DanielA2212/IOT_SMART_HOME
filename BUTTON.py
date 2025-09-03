@@ -164,7 +164,7 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn=QPushButton("Enable/Connect", self)
         self.eConnectbtn.setToolTip("click me to connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
-        self.eConnectbtn.setStyleSheet("background-color: gray")
+        self.eConnectbtn.setStyleSheet("background-color: gray; color: black")
         
         self.ePushtbtn=QPushButton("PUSH BUTTON", self)
         self.ePushtbtn.setToolTip("Push me")

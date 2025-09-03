@@ -15,9 +15,11 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id234-"+str(r)
+
 smart_home_topic = 'MY_SMART_HOME'
 DHT_sub_topic = 'home/daniel/RELAY'
 dht_publish_topic = 'home/daniel/DHT'
+
 update_rate = 7000 # in msec
 # (My) 7,000 msec = 7 sec
 
@@ -192,12 +194,15 @@ class ConnectionDock(QDockWidget):
         self.coldButton.setFixedSize(40, 40)
         self.coldButton.clicked.connect(self.set_cold_temp)
         self.coldButton.setStyleSheet("background-color: lightblue; font-size: 20px")
+        self.mc.publish_to(DHT_sub_topic, "Changed Temp")
         
         # Hot Button
         self.hotButton = QPushButton("🔥", self)
         self.hotButton.setFixedSize(40, 40)
         self.hotButton.clicked.connect(self.set_hot_temp)
         self.hotButton.setStyleSheet("background-color: lightsalmon; font-size: 20px")
+        self.mc.publish_to(DHT_sub_topic, "Changed Temp")
+
         
         # Add Buttons Horizontaly
         self.tempButtonsLayout.addWidget(self.coldButton)

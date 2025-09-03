@@ -15,7 +15,7 @@ r=random.randrange(1,10000000)
 clientname="IOT_client-Id567-"+str(r)
 
 smart_home_topic = 'MY_SMART_HOME'
-LDR_topic = 'home/daniel/RELAY'
+LDR_sub_topic = 'home/daniel/RELAY'
 ldr_publish_topic = 'home/daniel/LDR'
 
 update_rate = 5000 # in msec
@@ -170,7 +170,7 @@ class ConnectionDock(QDockWidget):
         self.eConnectbtn=QPushButton("Enable/Connect", self)
         self.eConnectbtn.setToolTip("click me to connect")
         self.eConnectbtn.clicked.connect(self.on_button_connect_click)
-        self.eConnectbtn.setStyleSheet("background-color: gray")
+        self.eConnectbtn.setStyleSheet("background-color: gray; color: black")
         
         self.ePublisherTopic=QLineEdit()
         self.ePublisherTopic.setText(smart_home_topic)
@@ -181,7 +181,7 @@ class ConnectionDock(QDockWidget):
         self.LightStatus=QLineEdit()
         self.LightStatus.setText('')
 
-        self.eSubscribeTopic = QLineEdit(LDR_topic)
+        self.eSubscribeTopic = QLineEdit(LDR_sub_topic)
 
         self.lightButtonsLayout = QHBoxLayout()
         
@@ -190,12 +190,15 @@ class ConnectionDock(QDockWidget):
         self.brightButton.setFixedSize(40, 40)
         self.brightButton.clicked.connect(self.set_bright)
         self.brightButton.setStyleSheet("background-color: yellow; font-size: 20px")
+        self.mc.publish_to(LDR_sub_topic, "Changed Light")
         
         # Dark Button
         self.darkButton = QPushButton("🌙", self)
         self.darkButton.setFixedSize(40, 40)
         self.darkButton.clicked.connect(self.set_dark)
         self.darkButton.setStyleSheet("background-color: darkgray; font-size: 20px")
+        self.mc.publish_to(LDR_sub_topic, "Changed Light")
+
         
         # Add Buttons Horizontaly
         self.lightButtonsLayout.addWidget(self.brightButton)
@@ -305,10 +308,10 @@ class MainWindow(QMainWindow):
             if self.the_light < 200:
                 light_status = "Very Bright"
 
-            elif 200 < self.the_light < 500:
+            elif 200 < self.the_light < 400:
                 light_status = "Moderate"
 
-            elif 500 < self.the_light < 700:
+            elif 400 < self.the_light < 600:
                 light_status = "Dim"
 
             else:
@@ -319,12 +322,12 @@ class MainWindow(QMainWindow):
             self.connectionDock.LightStatus.setText(light_status)
             self.mc.publish_to(smart_home_topic, current_data)
 
-            if self.the_light > 500: # Too Dark
+            if self.the_light > 390: # Too Dark
 
                 self.mc.publish_to(smart_home_topic, "Raising The Blinds Due To Low Brightness")
                 self.the_light -= 50
 
-            elif self.the_light < 200: # Too Bright
+            elif self.the_light < 210: # Too Bright
 
                 self.mc.publish_to(smart_home_topic, "Dimming The Blinds Due To Low Brightness")
                 self.the_light += 50
