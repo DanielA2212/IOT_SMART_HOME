@@ -1,4 +1,5 @@
 import sys
+from LOGGER import LOGGER
 import random
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -10,6 +11,9 @@ from mqtt_init import *
 global clientname
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id-"+str(r)
+
+# Initialize LOGGER
+logger = LOGGER("iot_data.csv")
 
 relay_topic = 'home/daniel/RELAY'
 
@@ -119,7 +123,14 @@ class Mqtt_client():
         self.client.subscribe(topic)
               
     def publish_to(self, topic, message):
-        self.client.publish(topic,message)        
+        self.client.publish(topic,message)
+        # Log the publish event
+        logger.add_record(
+            clientID=clientname,
+            transmitter="RELAY",
+            topic=topic,
+            message=message
+        )
       
 class ConnectionDock(QDockWidget):
     """Main """

@@ -129,6 +129,29 @@
 
 > 💡 **Pro Tip**: Use a terminal multiplexer like `tmux` or `screen` to manage multiple components easily
 
+
+## 📊 Data Logging
+
+All system components (BUTTON, LDR, RELAY, DHT) automatically log every published MQTT message to a CSV file named `iot_data.csv` in the project root. This log helps you track all system activity and message flow for debugging or analysis.
+
+### CSV Log Format
+
+| Column      | Description                        |
+|-------------|------------------------------------|
+| clientID    | Unique MQTT client identifier      |
+| timestamp   | Date and time of the event         |
+| transmitter | The component sending the message  |
+| topic       | MQTT topic the message was sent to |
+| message     | The actual message content         |
+
+**Example CSV row:**
+
+```
+IOT_client-Id-1234567,2025-09-05 14:23:01,BUTTON,home/daniel/BUTTON,[BUTTON]: SINGLE CLICK
+```
+
+> The log is automatically updated every time a message is published by any component.
+
 ## Features
 
 - **Interactive GUI**: User-friendly interface with detachable tabs
@@ -137,6 +160,7 @@
 - **MQTT Communication**: Reliable message handling between components
 - **Multi-click Functionality**: Different actions based on click patterns
 - **Status Display**: Real-time status updates for all components
+- **Automatic Data Logging**: All MQTT publish events are recorded in `iot_data.csv` with topic information
 
 ## 📁 Project Structure
 

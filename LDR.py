@@ -1,4 +1,5 @@
 import sys
+from LOGGER import LOGGER
 import random
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
@@ -13,6 +14,9 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id567-"+str(r)
+
+# Initialize LOGGER
+logger = LOGGER("iot_data.csv")
 
 smart_home_topic = 'MY_SMART_HOME'
 LDR_sub_topic = 'home/daniel/RELAY'
@@ -128,8 +132,15 @@ class Mqtt_client():
     def publish_to(self, topic, message):
         if CONNECTED:
             self.client.publish(topic,message)
+            # Log the publish event
+            logger.add_record(
+                clientID=clientname,
+                transmitter="LDR",
+                topic=topic,
+                message=message
+            )
         else:
-            print("Can't publish. Connecection should be established first")            
+            print("Can't publish. Connecection should be established first")
       
 class ConnectionDock(QDockWidget):
     """Main """

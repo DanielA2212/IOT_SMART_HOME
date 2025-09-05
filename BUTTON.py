@@ -1,4 +1,5 @@
 import sys
+from LOGGER import LOGGER
 import random
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -12,6 +13,9 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id-"+str(r)
+
+# Initialize LOGGER
+logger = LOGGER("iot_data.csv")
 
 button_topic = 'home/daniel/BUTTON' 
 
@@ -119,8 +123,15 @@ class Mqtt_client():
     def publish_to(self, topic, message):
         if CONNECTED:
             self.client.publish(topic,message)
+            # Log the publish event
+            logger.add_record(
+                clientID=clientname,
+                transmitter="BUTTON",
+                topic=topic,
+                message=message
+            )
         else:
-            print("Can't publish. Connecection should be established first")         
+            print("Can't publish. Connecection should be established first")
       
 class ConnectionDock(QDockWidget):
     """Main """
