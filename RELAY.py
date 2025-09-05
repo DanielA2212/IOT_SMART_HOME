@@ -202,7 +202,7 @@ class ConnectionDock(QDockWidget):
     def update_btn_state(self,text):
         global STATE
 
-        if ('DOUBLE CLICK' or 'Changed Temp') in text and STATE != 'AUTO TEMP ON':
+        if ('DOUBLE CLICK' in text and STATE != 'AUTO TEMP ON') or ('Changed Temp' in text and STATE == 'AUTO TEMP ON'):
             self.ePushtbtn.setText("AUTO TEMP ON (Working...)")
             self.ePushtbtn.setStyleSheet("background-color: orange; color: black")
             STATE = 'AUTO TEMP ON'
@@ -221,7 +221,7 @@ class ConnectionDock(QDockWidget):
 
 
 
-        if ('TRIPLE CLICK' or 'Changed Light') in text and STATE != 'AUTO LIGHT ON':
+        if ('TRIPLE CLICK' in text and STATE != 'AUTO LIGHT ON') or ('Changed Light' in text and STATE == 'AUTO LIGHT ON'):
             self.ePushtbtn.setText("AUTO LIGHT ON (Working...)")
             self.ePushtbtn.setStyleSheet("background-color: blue; color: white")
             STATE = 'AUTO LIGHT ON'
@@ -248,8 +248,7 @@ class ConnectionDock(QDockWidget):
             self.mc.publish_to(relay_topic,STATE)
             return
 
-        elif 'SINGLE CLICK' in text and STATE == 'MANUAL CLOSE':
-            
+        elif 'SINGLE CLICK' in text and STATE == 'MANUAL CLOSE':  
             self.ePushtbtn.setStyleSheet("background-color: violet; color: black")
             self.ePushtbtn.setText("Manual OPEN")
             STATE = 'MANUAL OPEN'
@@ -261,13 +260,13 @@ class ConnectionDock(QDockWidget):
         if 'Optimal Light Level' in text:
             self.ePushtbtn.setStyleSheet("background-color: green; color: white")
             self.ePushtbtn.setText("Optimal Light Level")
-            STATE = 'OFF'
+            STATE = 'AUTO LIGHT ON'
             return
         
         if 'Optimal Temperature' in text:
             self.ePushtbtn.setStyleSheet("background-color: green; color: white")
             self.ePushtbtn.setText("Optimal Temperature")
-            STATE = 'OFF'
+            STATE = 'AUTO TEMP ON'
             return
         
 

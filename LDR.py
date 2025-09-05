@@ -240,13 +240,12 @@ class ConnectionDock(QDockWidget):
             self.mc.publish_to(smart_home_topic,"Starting AUTO LIGHT Operation")
             LIGHT = True 
         
-        elif "AUTO LIGHT OFF" in text:
+        elif ("AUTO LIGHT OFF" in text) or ("MANUAL" in text and LIGHT) or ("AUTO TEMP ON" in text and LIGHT):
             self.mc.publish_to(smart_home_topic,"Stopping AUTO LIGHT Operation")
             LIGHT = False
 
-        elif LIGHT:
-            LIGHT = False
-            self.mc.publish_to(smart_home_topic,"Stopping AUTO LIGHT Operation")
+        else:
+            return
 
 
         if not LIGHT:
@@ -255,23 +254,25 @@ class ConnectionDock(QDockWidget):
             self.LightLevel.setText("")
             self.LightStatus.setText("")
             return
+        
         else:
             self.OperationMode.setText("Operational")
             self.OperationMode.setStyleSheet("background-color: green; color: white")
             return
 
+
     def set_bright(self):
         global LIGHT
         if LIGHT:
             mainwin.the_light = 100
-            self.mc.publish_to(LDR_sub_topic, "Changed Light")
+            self.mc.publish_to(ldr_publish_topic, "Changed Light")
 
 
     def set_dark(self):
         global LIGHT
         if LIGHT:
             mainwin.the_light = 800
-            self.mc.publish_to(LDR_sub_topic, "Changed Light")
+            self.mc.publish_to(ldr_publish_topic, "Changed Light")
 
      
 class MainWindow(QMainWindow):

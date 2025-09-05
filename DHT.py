@@ -200,7 +200,6 @@ class ConnectionDock(QDockWidget):
         self.hotButton.setFixedSize(40, 40)
         self.hotButton.clicked.connect(self.set_hot_temp)
         self.hotButton.setStyleSheet("background-color: lightsalmon; font-size: 20px")
-        self.mc.publish_to(DHT_sub_topic, "Changed Temp")
 
         
         # Add Buttons Horizontaly
@@ -242,15 +241,15 @@ class ConnectionDock(QDockWidget):
             self.mc.publish_to(smart_home_topic,"Starting AUTO TEMP Operation")
             TEMP = True 
         
-        elif "AUTO TEMP OFF" in text:
+        elif ("AUTO TEMP OFF" in text) or ("MANUAL" in text and TEMP) or ("AUTO LIGHT ON" in text and TEMP):
             self.mc.publish_to(smart_home_topic,"Stoping AUTO TEMP Operation")
             TEMP = False
 
-        elif TEMP:
-            self.mc.publish_to(smart_home_topic,"Stoping AUTO TEMP Operation")
-            TEMP = False
+        else:
+            return
 
-        
+
+
 
         if not TEMP:
             self.OperationMode.setText("Not Operational")
@@ -264,11 +263,12 @@ class ConnectionDock(QDockWidget):
             self.OperationMode.setStyleSheet("background-color: green; color: white")
             return
 
+
     def set_cold_temp(self):
         global TEMP
         if TEMP:
             mainwin.the_temp = 16
-            self.mc.publish_to(DHT_sub_topic, "Changed Temp")
+            self.mc.publish_to(dht_publish_topic, "Changed Temp")
 
 
 
@@ -276,7 +276,7 @@ class ConnectionDock(QDockWidget):
         global TEMP
         if TEMP:
             mainwin.the_temp = 35
-            self.mc.publish_to(DHT_sub_topic, "Changed Temp")
+            self.mc.publish_to(dht_publish_topic, "Changed Temp")
  
            
 
