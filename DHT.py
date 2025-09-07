@@ -18,7 +18,7 @@ r=random.randrange(1,10000000)
 clientname="IOT_client-Id234-"+str(r)
 
 # Initialize LOGGER
-logger = LOGGER("iot_data.csv")
+logger = LOGGER("IOT_DB_RECORDS.csv")
 
 smart_home_topic = 'MY_SMART_HOME'
 DHT_sub_topic = 'home/daniel/RELAY'

@@ -16,7 +16,7 @@ r=random.randrange(1,10000000)
 clientname="IOT_client-Id567-"+str(r)
 
 # Initialize LOGGER
-logger = LOGGER("iot_data.csv")
+logger = LOGGER("IOT_DB_RECORDS.csv")
 
 smart_home_topic = 'MY_SMART_HOME'
 LDR_sub_topic = 'home/daniel/RELAY'
@@ -305,7 +305,7 @@ class MainWindow(QMainWindow):
 
         # set up main window
         self.setGeometry(30, 600, 300, 150)
-        self.setWindowTitle('LDR Light Sensor')        
+        self.setWindowTitle('LDR')        
 
         # Init QDockWidget objects        
         self.connectionDock = ConnectionDock(self.mc)        
