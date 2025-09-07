@@ -8,7 +8,7 @@
 
 ## ✨ Key Features
 
-- 🌡️ Real-time temperature and humidity monitoring.
+- 🌡️ Real-time temperature and humidity monitoring
 - 💡 Intelligent light control system
 - 🔌 Smart relay management
 - 🖥️ User-friendly GUI with detachable tabs
